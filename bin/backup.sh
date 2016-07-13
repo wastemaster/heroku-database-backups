@@ -26,7 +26,8 @@ chmod +x ./awscli-bundle/install
 
 BACKUP_FILE_NAME="$(date +"%Y-%m-%d-%H-%M")-$APP-$DATABASE.dump"
 
-/app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $APP
+nohup /app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $APP &
+sleep 5
 curl -o $BACKUP_FILE_NAME `/app/vendor/heroku-toolbelt/bin/heroku pg:backups public-url --app $APP`
 gzip $BACKUP_FILE_NAME
 /tmp/aws/bin/aws s3 cp $BACKUP_FILE_NAME.gz s3://$S3_BUCKET_PATH/$APP/$DATABASE/$BACKUP_FILE_NAME.gz
