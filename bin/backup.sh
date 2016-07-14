@@ -8,11 +8,6 @@ if [[ -z "$APP" ]]; then
   exit 1
 fi
 
-if [[ -z "$SOURCE_APP" ]]; then
-  echo "Missing Source APP variable"
-  exit 1
-fi
-
 if [[ -z "$DATABASE" ]]; then
   echo "Missing DATABASE variable which must be set to the name of the DATABASE you would like to backup"
   exit 1
@@ -31,10 +26,10 @@ chmod +x ./awscli-bundle/install
 
 BACKUP_FILE_NAME="$(date +"%Y-%m-%d-%H-%M")-$APP-$DATABASE.dump"
 
-nohup /app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $APP &
-sleep 5
-curl -o $BACKUP_FILE_NAME `/app/vendor/heroku-toolbelt/bin/heroku pg:backups public-url --app $SOURCE_APP`
+/app/vendor/heroku-toolbelt/bin/heroku pg:backups capture $DATABASE --app $APP
+curl -o $BACKUP_FILE_NAME `/app/vendor/heroku-toolbelt/bin/heroku pg:backups public-url --app $APP`
 gzip $BACKUP_FILE_NAME
-/tmp/aws/bin/aws s3 cp $BACKUP_FILE_NAME.gz s3://$S3_BUCKET_PATH/$APP/$DATABASE/$BACKUP_FILE_NAME.gz
+# /tmp/aws/bin/aws s3 cp $BACKUP_FILE_NAME.gz s3://$S3_BUCKET_PATH/$APP/$DATABASE/$BACKUP_FILE_NAME.gz
+/tmp/aws/bin/aws s3 cp $BACKUP_FILE_NAME.gz s3://$S3_BUCKET_PATH/$(date +"%Y-%m-%d")/$BACKUP_FILE_NAME.gz
 echo "backup $BACKUP_FILE_NAME complete"
 
